@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flask ML Demo</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 680px; margin: 40px auto; padding: 0 20px; }
+      label { display:block; margin-top:10px }
+      input[type=number] { width:120px }
+      .result { margin-top:20px; padding:10px; border:1px solid #ddd; background:#f9f9f9 }
+    </style>
+  </head>
+  <body>
+    <h1>Flask + ML Demo (Iris)</h1>
+    <p>Enter four features (sepal length, sepal width, petal length, petal width)</p>
+
+    <form method="post">
+      <label>Sepal length: <input type="number" step="0.1" name="f1" required></label>
+      <label>Sepal width: <input type="number" step="0.1" name="f2" required></label>
+      <label>Petal length: <input type="number" step="0.1" name="f3" required></label>
+      <label>Petal width: <input type="number" step="0.1" name="f4" required></label>
+      <p><button type="submit">Predict</button></p>
+    </form>
+
+    {% if error %}
+      <div class="result">Error: {{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+      <div class="result">
+        <strong>Prediction:</strong> {{ result.class_name }} (index: {{ result.class_index }})<br>
+        <strong>Confidence:</strong> {{ (result.probability * 100) | round(2) }}%<br>
+        <strong>All probabilities:</strong> {{ result.all_probabilities }}
+      </div>
+    {% endif %}
+  </body>
+</html>
