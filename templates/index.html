@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Causal Chat Analysis Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-comments"></i> Causal Chat Analysis</h1>
+                <p>Analyze conversation patterns and predict escalations</p>
+            </div>
+            <div class="loading-indicator" id="loadingIndicator">
+                <span class="spinner"></span> Loading data...
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="overview">
+                <i class="fas fa-chart-pie"></i> Overview
+            </button>
+            <button class="tab-btn" data-tab="causes">
+                <i class="fas fa-project-diagram"></i> Causes
+            </button>
+            <button class="tab-btn" data-tab="signals">
+                <i class="fas fa-exclamation-triangle"></i> Signals
+            </button>
+            <button class="tab-btn" data-tab="warnings">
+                <i class="fas fa-bell"></i> Early Warnings
+            </button>
+            <button class="tab-btn" data-tab="insights">
+                <i class="fas fa-lightbulb"></i> Insights
+            </button>
+        </nav>
+
+        <!-- Content Tabs -->
+        <main class="content">
+            <!-- Overview Tab -->
+            <section id="overview" class="tab-content active">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-comments"></i></div>
+                        <div class="metric-content">
+                            <h3>Total Conversations</h3>
+                            <p class="metric-value" id="totalTranscripts">0</p>
+                            <span class="metric-unit">analyzed</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div class="metric-content">
+                            <h3>Total Turns</h3>
+                            <p class="metric-value" id="totalTurns">0</p>
+                            <span class="metric-unit">exchanges</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon alert"><i class="fas fa-arrow-up"></i></div>
+                        <div class="metric-content">
+                            <h3>Escalation Rate</h3>
+                            <p class="metric-value" id="escalationRate">0%</p>
+                            <span class="metric-unit">of conversations</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon success"><i class="fas fa-check-circle"></i></div>
+                        <div class="metric-content">
+                            <h3>Escalated</h3>
+                            <p class="metric-value" id="escalatedCount">0</p>
+                            <span class="metric-unit">conversations</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <h3>Escalation Breakdown</h3>
+                        <canvas id="escalationChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Top Domains</h3>
+                        <canvas id="domainsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container full-width">
+                    <h3>Top Intents</h3>
+                    <canvas id="intentsChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Causes Tab -->
+            <section id="causes" class="tab-content">
+                <div class="section-header">
+                    <h2>Root Cause Analysis</h2>
+                    <p>Identifies the primary factors leading to conversation escalations</p>
+                </div>
+
+                <div class="causes-grid">
+                    <div class="cause-card">
+                        <h3><i class="fas fa-frown"></i> Customer Frustration</h3>
+                        <div class="cause-details">
+                            <p class="cause-count" id="frustrationCount">0</p>
+                            <div class="cause-bar" id="frustrationBar"></div>
+                            <p class="cause-percentage" id="frustrationPercent">0%</p>
+                        </div>
+                    </div>
+
+                    <div class="cause-card">
+                        <h3><i class="fas fa-hourglass-half"></i> Agent Delay</h3>
+                        <div class="cause-details">
+                            <p class="cause-count" id="delayCount">0</p>
+                            <div class="cause-bar" id="delayBar"></div>
+                            <p class="cause-percentage" id="delayPercent">0%</p>
+                        </div>
+                    </div>
+
+                    <div class="cause-card">
+                        <h3><i class="fas fa-ban"></i> Agent Denial</h3>
+                        <div class="cause-details">
+                            <p class="cause-count" id="denialCount">0</p>
+                            <div class="cause-bar" id="denialBar"></div>
+                            <p class="cause-percentage" id="denialPercent">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container full-width">
+                    <h3>Cause Distribution</h3>
+                    <canvas id="causesChart"></canvas>
+                </div>
+
+                <div class="evidence-section">
+                    <h3>Evidence & Examples</h3>
+                    <div id="evidenceList" class="evidence-list"></div>
+                </div>
+            </section>
+
+            <!-- Signals Tab -->
+            <section id="signals" class="tab-content">
+                <div class="section-header">
+                    <h2>Signal Extraction</h2>
+                    <p>Detected patterns and keywords in conversations</p>
+                </div>
+
+                <div class="signals-summary">
+                    <div class="signal-stat">
+                        <h4>Total Signals</h4>
+                        <p class="big-number" id="totalSignals">0</p>
+                    </div>
+                    <div class="signal-stat">
+                        <h4>Signal Types</h4>
+                        <p class="big-number">3</p>
+                    </div>
+                    <div class="signal-stat">
+                        <h4>Keywords</h4>
+                        <p class="big-number" id="keywordCount">0</p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Signals by Type</h3>
+                    <canvas id="signalsChart"></canvas>
+                </div>
+
+                <div class="keywords-section">
+                    <h3>Signal Keywords</h3>
+                    <div class="keywords-grid" id="keywordsGrid"></div>
+                </div>
+            </section>
+
+            <!-- Warnings Tab -->
+            <section id="warnings" class="tab-content">
+                <div class="section-header">
+                    <h2>Early Warning System</h2>
+                    <p>Predicts potential escalations before they occur</p>
+                </div>
+
+                <div class="warning-cards">
+                    <div class="warning-card alert">
+                        <h3><i class="fas fa-exclamation-circle"></i> High Risk</h3>
+                        <p class="warning-count" id="highRiskCount">0</p>
+                        <span>conversations</span>
+                    </div>
+
+                    <div class="warning-card warning">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Multi-Signal</h3>
+                        <p class="warning-count" id="multiWarningCount">0</p>
+                        <span>warnings</span>
+                    </div>
+
+                    <div class="warning-card info">
+                        <h3><i class="fas fa-flag"></i> Single-Signal</h3>
+                        <p class="warning-count" id="singleWarningCount">0</p>
+                        <span>warnings</span>
+                    </div>
+                </div>
+
+                <div class="chart-container full-width">
+                    <h3>Warning Distribution</h3>
+                    <canvas id="warningsChart"></canvas>
+                </div>
+
+                <div class="thresholds-section">
+                    <h3>Detection Thresholds</h3>
+                    <div class="thresholds-list" id="thresholdsList"></div>
+                </div>
+            </section>
+
+            <!-- Insights Tab -->
+            <section id="insights" class="tab-content">
+                <div class="section-header">
+                    <h2>Key Insights & Recommendations</h2>
+                    <p>Actionable insights based on analysis</p>
+                </div>
+
+                <div class="insights-list">
+                    <div class="insight-card priority-1">
+                        <div class="insight-header">
+                            <span class="priority-badge">Priority 1</span>
+                            <h3>Address Customer Frustration</h3>
+                        </div>
+                        <p>Customer frustration is the leading cause of escalations. Implement training programs focused on empathy and customer satisfaction.</p>
+                        <div class="insight-stats">
+                            <span><strong>Impact:</strong> High</span>
+                            <span><strong>Effort:</strong> Medium</span>
+                        </div>
+                    </div>
+
+                    <div class="insight-card priority-2">
+                        <div class="insight-header">
+                            <span class="priority-badge">Priority 2</span>
+                            <h3>Reduce Agent Response Time</h3>
+                        </div>
+                        <p>Agent delays contribute significantly to escalations. Review process bottlenecks and optimize response workflows.</p>
+                        <div class="insight-stats">
+                            <span><strong>Impact:</strong> High</span>
+                            <span><strong>Effort:</strong> High</span>
+                        </div>
+                    </div>
+
+                    <div class="insight-card priority-3">
+                        <div class="insight-header">
+                            <span class="priority-badge">Priority 3</span>
+                            <h3>Review Denial Policies</h3>
+                        </div>
+                        <p>Evaluate policy flexibility for edge cases to reduce customer frustration from denials.</p>
+                        <div class="insight-stats">
+                            <span><strong>Impact:</strong> Medium</span>
+                            <span><strong>Effort:</strong> Medium</span>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <h3>Implement Real-Time Alerts</h3>
+                        </div>
+                        <p>Use the early warning system to alert agents of conversations showing escalation signals in real-time for immediate intervention.</p>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <h3>Monitor Domain-Specific Patterns</h3>
+                        </div>
+                        <p>Different domains show different escalation patterns. Tailor interventions based on domain-specific analysis.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 Causal Chat Analysis - All Rights Reserved</p>
+            <p>Data last updated: <span id="lastUpdated">--:-- --</span></p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
